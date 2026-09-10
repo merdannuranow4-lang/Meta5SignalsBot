@@ -45,7 +45,7 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
-   if query.data == "back_to_start":
+if query.data == "back_to_start":
          await query.edit_message_text(
              text=START_TEXT,
              reply_markup=get_start_keyboard()
