@@ -1,4 +1,4 @@
-import os
+import os 
 from flask import Flask
 from threading import Thread
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return "Meta5Signals Premium Bot is running! 🚀"
+    return "Meta5Signals Bot is running! 🚀"
 
 def run_web():
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
