@@ -18,12 +18,12 @@ def run_web():
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [
-            InlineKeyboardButton("Signallar", url="https://t.me/meta5signals_XAUUSD "),
-            InlineKeyboardButton("News", url="https://t.me/GoldFnews")
+            InlineKeyboardButton("📊 Signallar", url="https://t.me/meta5signals_XAUUSD "),
+            InlineKeyboardButton("🗞️ News", url="https://t.me/GoldFnews")
         ],
         [
-            InlineKeyboardButton("Chat group", url="https://t.me/meta5signal_chat"),
-            InlineKeyboardButton("🏆 Netijeler", callback_data="results")
+            InlineKeyboardButton("👥 Chat group", url="https://t.me/meta5signal_chat"),
+            InlineKeyboardButton("🌐 Website", callback_data="results")
         ],
         [
             InlineKeyboardButton("💎 Premium Agzalyk", callback_data="premium")
@@ -33,8 +33,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await update.message.reply_text(
-        "🚀 Meta5Signals Premium Bot-a hoş geldiňiz!\n\n"
-        "💎 Forex & XAUUSD Premium Signals\n"
+        "🚀 FX_Nexor Bot-a hoş geldiňiz!\n\n"
+        "💎 Forex & XAUUSD  Signals and News\n"
         "📈 Professional Market Analysis\n"
         "🔔 Real-Time Trading Signals\n\n"
         "Aşakdaky menýudan saýla:",
@@ -52,7 +52,7 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == "analysis":
         text = "📈 Bazar Analizi\n\nProfessional analizler şu ýerde bolar."
     elif query.data == "results":
-        text = "🏆 Signal Netijeleri\n\nNetijeler şu ýerde görkeziler."
+        text = "🏆 Signal Netijeleri\n\nHäzirlikçe el ýeterli däl."
     elif query.data == "premium":
         text = "💎 Premium Agzalyk\n\nPremium hyzmat ýakynda elýeterli bolar."
     else:
