@@ -18,7 +18,7 @@ def run_web():
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [
-            InlineKeyboardButton("📊 Signals", url="https://t.me/meta5signals_XAUUSD "),
+            InlineKeyboardButton("📊 Signals", url="https://t.me/meta5signals_XAUUSD"),
             InlineKeyboardButton("🗞️ News", url="https://t.me/GoldFnews")
         ],
         [
@@ -51,6 +51,7 @@ if query.data == "back_to_start":
              reply_markup=get_start_keyboard()
          )
          return
+    
     back_keyboard = InlineKeyboardMarkup([
          [InlineKeyboardButton("🔙 Yza", callback_data="back_to_start")]
      ])
