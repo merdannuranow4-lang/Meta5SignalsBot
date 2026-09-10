@@ -22,7 +22,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             InlineKeyboardButton("🥇 XAUUSD", callback_data="gold")
         ],
         [
-            InlineKeyboardButton("📈 Analiz", callback_data="analysis"),
+            InlineKeyboardButton("Chat group", url="https://t.me/meta5signal_chat"),
             InlineKeyboardButton("🏆 Netijeler", callback_data="results")
         ],
         [
