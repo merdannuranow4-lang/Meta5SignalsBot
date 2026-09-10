@@ -45,16 +45,17 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
-if query.data == "back_to_start":
-         await query.edit_message_text(
-             text=START_TEXT,
-             reply_markup=get_start_keyboard()
-         )
-         return
+    if query.data == "back_to_start":
+        await query.edit_message_text(
+            text=START_TEXT,
+            reply_markup=get_start_keyboard()
+        )
+        return
     
     back_keyboard = InlineKeyboardMarkup([
-         [InlineKeyboardButton("🔙 Yza", callback_data="back_to_start")]
-     ])
+        [InlineKeyboardButton("🔙 Yza", callback_data="back_to_start")]
+    ])
+    
     if query.data == "signals":
         text = "📊 Premium Signallar\n\nHäzirlikçe täze signal ýok."
     elif query.data == "gold":
