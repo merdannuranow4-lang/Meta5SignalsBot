@@ -52,7 +52,7 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == "analysis":
         text = "📈 Bazar Analizi\n\nProfessional analizler şu ýerde bolar."
     elif query.data == "results":
-        text = "🏆 Signal Netijeleri\n\nHäzirlikçe el ýeterli däl."
+        text = "🌐 Website\n\nHäzirlikçe el ýeterli däl."
     elif query.data == "premium":
         text = "💎 Premium Agzalyk\n\nPremium hyzmat ýakynda elýeterli bolar."
     else:
