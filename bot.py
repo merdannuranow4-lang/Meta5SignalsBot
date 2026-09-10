@@ -18,7 +18,7 @@ def run_web():
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [
-            InlineKeyboardButton("📊 Premium Signallar", callback_data="signals"),
+            InlineKeyboardButton("📊 Signallar", url="https://t.me/meta5signals_XAUUSD "),
             InlineKeyboardButton("🥇 XAUUSD", callback_data="gold")
         ],
         [
