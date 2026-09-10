@@ -51,7 +51,7 @@ if query.data == "back_to_start":
              reply_markup=get_start_keyboard()
          )
          return
-     back_keyboard = InlineKeyboardMarkup([
+    back_keyboard = InlineKeyboardMarkup([
          [InlineKeyboardButton("🔙 Yza", callback_data="back_to_start")]
      ])
     if query.data == "signals":
