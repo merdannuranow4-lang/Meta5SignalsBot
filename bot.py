@@ -46,9 +46,27 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
 
     if query.data == "back_to_start":
+        keyboard = [
+            [
+                InlineKeyboardButton("📊 Signals", url="https://t.me/meta5signals_XAUUSD"),
+                InlineKeyboardButton("🗞️ News", url="https://t.me/GoldFnews")
+            ],
+            [
+                InlineKeyboardButton("👥 Chat group", url="https://t.me/meta5signal_chat"),
+                InlineKeyboardButton("🌐 Website", callback_data="results")
+            ],
+            [
+                InlineKeyboardButton("💎 Premium Agzalyk", callback_data="premium")
+            ]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
         await query.edit_message_text(
-            text=START_TEXT,
-            reply_markup=get_start_keyboard()
+            text="🚀 FX_Nexor Bot-a hoş geldiňiz!\n\n"
+                 "💎 Forex & XAUUSD  Signals and News\n"
+                 "📈 Professional Market Analysis\n"
+                 "🔔 Real-Time Trading Signals\n\n"
+                 "Aşakdaky menýudan saýla:",
+            reply_markup=reply_markup
         )
         return
     
@@ -105,3 +123,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
