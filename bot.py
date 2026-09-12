@@ -15,9 +15,9 @@ TUTORIAL_GROUP_LINK = "https://t.me/referal_bolmak"
 # Administratoryň Telegram ID-si
 ADMIN_ID = 6970856886
 
-# Premium gruppanyň gizlin ssylkasy (Aýlyk möhleti gutaranda ulanmak üçin Supergroup ID hem gerek bolup biler, ýöne bu ýerde ssylka iberilýär)
+# Premium gruppanyň gizlin ssylkasy
 PREMIUM_GROUP_LINK = "https://t.me/+ydp8yB7HNgNkNzJi"
-PREMIUM_GROUP_CHAT_ID = os.getenv("-1004401546667") # Mysal üçin: -1001234567890 (Ulanyjyny grupuň özünden çykarmak üçin zerur)
+PREMIUM_GROUP_CHAT_ID = os.getenv("-1004401546667")
 
 app = Flask(__name__)
 
@@ -44,13 +44,23 @@ def init_db():
     conn.close()
 
 def add_subscription(user_id, username, days):
-    expire_date = datetime.now() + timedelta(days=days)
+    # Eger days 0 ýa-da oňa meňzeş bolsa (m/s referal üçin wagt çäklendirmesi ýok bolsa), uzak wagt ýa-da null saklap bolar
+    if days > 0:
+        expire_date = datetime.now() + timedelta(days=days)
+        expire_str = expire_date.strftime("%Y-%m-%d %H:%M:%S")
+        plan_text = f"{days} gün"
+    else:
+        # Referal üçin wagt çäklendirmesi yok ýa-da uzak möhlet (mysal üçin 3650 gün - 10 ýyl)
+        expire_date = datetime.now() + timedelta(days=3650)
+        expire_str = expire_date.strftime("%Y-%m-%d %H:%M:%S")
+        plan_text = "Referal (Wagtsyz)"
+
     conn = sqlite3.connect("subscriptions.db")
     cursor = conn.cursor()
     cursor.execute("""
         INSERT OR REPLACE INTO subs (user_id, username, plan_name, expire_date)
         VALUES (?, ?, ?, ?)
-    """, (user_id, username, f"{days} gün", expire_date.strftime("%Y-%m-%d %H:%M:%S")))
+    """, (user_id, username, plan_text, expire_str))
     conn.commit()
     conn.close()
 
@@ -58,7 +68,7 @@ def get_expired_users():
     conn = sqlite3.connect("subscriptions.db")
     cursor = conn.cursor()
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    cursor.execute("SELECT user_id FROM subs WHERE expire_date <= ?", (now_str,))
+    cursor.execute("SELECT user_id FROM subs WHERE expire_date <= ? AND plan_name != 'Referal (Wagtsyz)'", (now_str,))
     users = [row[0] for row in cursor.fetchall()]
     conn.close()
     return users
@@ -186,7 +196,6 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data.startswith("plan_"):
         days = query.data.split("_")[1]
         
-        # Günleri görnüşe görä bahalandyryp bolar (häzirlikçe 1 aýlyk 40 USD, galanlaryny özüňiz üýtgedip bilersiňiz)
         prices = {"30": "40", "90": "100", "180": "180", "365": "300"}
         price = prices.get(days, "40")
         month_label = {"30": "bir aýlyk", "90": "üç aýlyk", "180": "alty aýlyk", "365": "bir ýyllyk"}.get(days, "bir aýlyk")
@@ -212,17 +221,23 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         parts = query.data.split("_")
         target_user_id = int(parts[1])
-        days = int(parts[2]) if len(parts) > 2 else 30 # Eger görkezilmedik bolsa deslapky 30 gün
-
-        # Bazada hasaba al
-        add_subscription(target_user_id, "Unknown", days)
+        
+        # Eger referal bolsa (days ýok ýa-da 0 berlen bolsa)
+        if len(parts) > 2 and parts[2] != "ref":
+            days = int(parts[2])
+            add_subscription(target_user_id, "Unknown", days)
+            success_msg = f"✅ Ulanyjy (ID: `{target_user_id}`) tassyksyny aldy we {days} günlük premium berildi."
+        else:
+            # Referal üçin wagt çäklendirmesi ýok (wagtsyz)
+            add_subscription(target_user_id, "Unknown", 0)
+            success_msg = f"✅ Referal ulanyjy (ID: `{target_user_id}`) tassyksyny aldy (Wagtsyz)."
 
         try:
             await context.bot.send_message(
                 chat_id=target_user_id,
-                text=f"🎉 Gutlaýarys! Siziň töleg tassyklamasy alyndy. Premium toparyň ssylkasy:\n\n{PREMIUM_GROUP_LINK}"
+                text=f"🎉 Gutlaýarys! Siziň maglumatyňyz tassyksyny tapdy. Premium toparyň ssylkasy:\n\n{PREMIUM_GROUP_LINK}"
             )
-            await query.edit_message_text(text=f"✅ Ulanyjy (ID: `{target_user_id}`) tassyksyny aldy we {days} günlük premium berildi.", parse_mode="Markdown")
+            await query.edit_message_text(text=success_msg, parse_mode="Markdown")
         except Exception:
             await query.edit_message_text(text="⚠️ Ulanyja habar ýetirip bolmady (boti bloklan bolmagy mümkin).")
         return
@@ -236,7 +251,7 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
             await context.bot.send_message(
                 chat_id=target_user_id,
-                text="❌ Bagyşlaň, siz iberen skrinşod ýa-da maglumat tassyklanmadi. Ýalňyşlyk bar bolsa gaýtadan barlaň."
+                text="❌ Bagyşlaň, siz iberen maglumat ýa-da skrinşod tassyklanmadi. Ýalňyşlyk bar bolsa gaýtadan barlaň."
             )
             await query.edit_message_text(text=f"❌ Ulanyjy (ID: `{target_user_id}`) üçin sorag rad edildi.")
         except Exception:
@@ -261,9 +276,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"👤 Ulanyjy: @{username} (ID: `{user_id}`)\n"
             f"📋 Broker ID / Poçta: `{text}`"
         )
+        # REFRAL ÜÇIN "30 gün" AÝRYLDY, DINE TASSYKLA WE RAD ET DÜWMELERI GOÝULDY
         admin_keyboard = InlineKeyboardMarkup([
             [
-                InlineKeyboardButton("✅ Tassykla (30 gün)", callback_data=f"approve_{user_id}_30"),
+                InlineKeyboardButton("✅ Tassykla", callback_data=f"approve_{user_id}_ref"),
                 InlineKeyboardButton("❌ Rad Et", callback_data=f"reject_{user_id}")
             ]
         ])
@@ -286,7 +302,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ])
 
         try:
-            # Eger ulanyjy skrinşod iberen bolsa, suratly ugratmak üçin check
             if update.message.photo:
                 photo_file_id = update.message.photo[-1].file_id
                 caption = (
@@ -308,22 +323,18 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except Exception as e:
             await update.message.reply_text("⚠️ Maglumaty admina ugratmakda ýalňyşlyk ýüze çykdy.")
 
-# Wagt möhleti gutaran ulanyjylary awtomatiki çykarmak üçin fon fuksýasy
 async def check_subscriptions_loop(application):
     while True:
-        await asyncio.sleep(3600) # Her sagatda bir gezek barlaýar
+        await asyncio.sleep(3600)
         expired_users = get_expired_users()
         for user_id in expired_users:
-            # Eger PREMIUM_GROUP_CHAT_ID berlen bolsa, grupuň özünden çykarmaga synanyşýar
             if PREMIUM_GROUP_CHAT_ID:
                 try:
                     await application.bot.ban_chat_member(chat_id=PREMIUM_GROUP_CHAT_ID, user_id=user_id)
-                    # Çykaran badyna yzyna açmak üçin unban etmek zerur (ýönekeýçe girmedik ýaly etmeli bolar ýa-da ban goýmaly)
                     await application.bot.unban_chat_member(chat_id=PREMIUM_GROUP_CHAT_ID, user_id=user_id)
                 except Exception:
                     pass
             
-            # Ulanyja möhletiniň gutarandygy barada habar ýollaýar
             try:
                 await application.bot.send_message(
                     chat_id=user_id,
@@ -347,13 +358,12 @@ def main():
     application.add_handler(CallbackQueryHandler(buttons))
     application.add_handler(MessageHandler(filters.ALL & ~filters.COMMAND, handle_message))
 
-    # Awtomatik barlag wersiýasyny başlatmak üçin background task goşýarys
     async def post_init(app_instance):
         asyncio.create_task(check_subscriptions_loop(app_instance))
 
     application.post_init = post_init
 
-    print("Meta5Signals Bot started with full payment and automated expiration workflow!")
+    print("Meta5Signals Bot started successfully!")
     application.run_polling()
 
 if __name__ == "__main__":
