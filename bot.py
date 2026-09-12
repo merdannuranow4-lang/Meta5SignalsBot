@@ -10,7 +10,7 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 TUTORIAL_GROUP_LINK = "https://t.me/referal_bolmak"
 
 # Administratoryň Telegram ID-si (Öz Telegram ID-ňizi şu ýere ýazyň)
-ADMIN_ID = 6970856886  # <--- Öz Telegram ID-ňizi ýazmagy unutmaň!
+ADMIN_ID = 123456789  # <--- Öz Telegram ID-ňizi ýazmagy unutmaň!
 
 # Premium gruppanyň gizlin ssylkasy
 PREMIUM_GROUP_LINK = "https://t.me/+SizinGizlinSsylkanyz"
@@ -101,6 +101,7 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "• Signallar - günde 5 den 10 na çenli signal alarsyňyz.\n\n"
             "• Bazara we kriptowalýuta täsir edip biljek habarlar ýetiriler.\n\n"
             "• Risk menejment hasaplanar.\n\n"
+            "• Wideojaňda real time söwda ederis.\n\n"
             "• Her hepdäniň soňunda netije ýagny gazanalynan we ýitirlen pipsler hasaplanar.\n\n"
             "Özüñize amatly bolan usuly saýlaň:"
         )
