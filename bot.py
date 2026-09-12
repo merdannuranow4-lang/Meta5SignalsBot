@@ -87,7 +87,14 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text = "🌐 Website\n\nHäzirlikçe el ýeterli däl."
         await query.edit_message_text(text, reply_markup=back_keyboard)
     elif query.data == "premium":
-        text = "💎 **Premium Agzalyk Bölümi**\n\nÖzüñize amatly bolan usuly saýlaň:"
+        text = (
+            "💎 **Eger siz premium agza bolanyňyzda:**\n\n"
+            "• Signallar - günde 5 den 10 na çenli signal alarsyňyz.\n\n"
+            "• Bazara we kriptowalýuta täsir edip biljek habarlar ýetiriler.\n\n"
+            "• Risk menejment hasaplanar.\n\n"
+            "• Her hepdäniň soňunda netije ýagny gazanalynan we ýitirlen pipsler hasaplanar.\n\n"
+            "Özüñize amatly bolan usuly saýlaň:"
+        )
         premium_keyboard = InlineKeyboardMarkup([
             [InlineKeyboardButton("🤝 Meniň referalym bol", callback_data="ref_method")],
             [InlineKeyboardButton("💳 Satyn al", callback_data="buy_method")],
