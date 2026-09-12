@@ -58,18 +58,36 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     if query.data == "signals":
         text = "📊 Premium Signallar\n\nHäzirlikçe täze signal ýok."
+        await query.edit_message_text(text, reply_markup=back_keyboard)
     elif query.data == "gold":
         text = "🥇 XAUUSD\n\nAltyn boýunça signallar şu ýerde görkeziler."
+        await query.edit_message_text(text, reply_markup=back_keyboard)
     elif query.data == "analysis":
         text = "📈 Bazar Analizi\n\nProfessional analizler şu ýerde bolar."
+        await query.edit_message_text(text, reply_markup=back_keyboard)
     elif query.data == "results":
         text = "🌐 Website\n\nHäzirlikçe el ýeterli däl."
+        await query.edit_message_text(text, reply_markup=back_keyboard)
     elif query.data == "premium":
-        text = "💎 Premium Agzalyk\n\nPremium hyzmat ýakynda elýeterli bolar."
+        text = "💎 **Premium Agzalyk Bölümi**\n\nÖzüñize amatly bolan usuly saýlaň:"
+        premium_keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🤝 Meniň referalym bol", callback_data="ref_method")],
+            [InlineKeyboardButton("💳 Satyn al", callback_data="buy_method")],
+            [InlineKeyboardButton("🔙 Yza", callback_data="back_to_start")]
+        ])
+        await query.edit_message_text(text=text, reply_markup=premium_keyboard, parse_mode="Markdown")
+        return
+    elif query.data == "ref_method":
+        text = "🤝 **Referal arkaly Premium almak:**\n\n1. Brokerde hasap açyň.\n2. Depozit goýuň."
+        await query.edit_message_text(text, reply_markup=back_keyboard, parse_mode="Markdown")
+        return
+    elif query.data == "buy_method":
+        text = "💳 **Satyn almak:**\n\nBu bölüm ýakynda işläp başlar."
+        await query.edit_message_text(text, reply_markup=back_keyboard, parse_mode="Markdown")
+        return
     else:
         text = "❓ Näbelli bölüm."
-
-    await query.edit_message_text(text)
+        await query.edit_message_text(text, reply_markup=back_keyboard)
 
 def main():
     if not BOT_TOKEN:
