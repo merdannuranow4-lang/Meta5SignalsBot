@@ -10,9 +10,9 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 TUTORIAL_GROUP_LINK = "https://t.me/referal_bolmak"
 
 # Administratoryň Telegram ID-si (Öz Telegram ID-ňizi şu ýere ýazyň)
-ADMIN_ID = 6970856886  # <--- Öz Telegram ID-ňizi ýazmagy unutmaň!
+ADMIN_ID = 123456789  # <--- Öz Telegram ID-ňizi ýazmagy unutmaň!
 
-# Premium gruppanyň ý gizlin ssylkasy
+# Premium gruppanyň gizlin ssylkasy
 PREMIUM_GROUP_LINK = "https://t.me/+SizinGizlinSsylkanyz"
 
 app = Flask(__name__)
@@ -213,5 +213,5 @@ def main():
     print("Meta5Signals Bot started with auto-verification workflow!")
     application.run_polling()
 
-if __name__ == "main__":
+if __name__ == "__main__":
     main()
