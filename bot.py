@@ -6,6 +6,9 @@ from telegram.ext import Application, CommandHandler, CallbackQueryHandler, Cont
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
+# Referal düşündirişleri ýazjak toparyňyzyň ssylkasy
+TUTORIAL_GROUP_LINK = "https://t.me/referal_bolmak"
+
 app = Flask(__name__)
 
 @app.route("/")
@@ -103,8 +106,12 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(text=text, reply_markup=premium_keyboard, parse_mode="Markdown")
         return
     elif query.data == "ref_method":
-        text = "🤝 **Referal arkaly Premium almak:**\n\n1. Brokerde hasap açyň.\n2. Depozit goýuň."
-        await query.edit_message_text(text, reply_markup=back_keyboard, parse_mode="Markdown")
+        text = "🤝 **Referal arkaly Premium almak üçin aşakdaky düwmä basyp görkezme toparyna geçiň:**"
+        ref_keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🤔 Nädip referalyň bolmaly!?", url=TUTORIAL_GROUP_LINK)],
+            [InlineKeyboardButton("🔙 Yza", callback_data="premium")]
+        ])
+        await query.edit_message_text(text=text, reply_markup=ref_keyboard, parse_mode="Markdown")
         return
     elif query.data == "buy_method":
         text = "💳 **Satyn almak:**\n\nBu bölüm ýakynda işläp başlar."
@@ -130,4 +137,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
