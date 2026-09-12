@@ -14,7 +14,7 @@ TUTORIAL_GROUP_LINK = "https://t.me/referal_bolmak"
 ADMIN_ID = 6970856886  # <--- Öz Telegram ID-ňizi ýazmagy unutmaň!
 
 # Premium gruppanyň ID-si (Bot şol grupda admin bolmaly we çakylyk döretmäge hukugy bolmaly)
-PREMIUM_GROUP_ID = -1004401546667  # <--- Öz Premium gruppanyňyzyň ID-sini ýazyň (m/b: -100...)
+PREMIUM_GROUP_ID = -1004401546667  # <--- Öz Premium gruppanyňyzyň ID-sini ýazyň
 
 # Kripto gapjyk adresiniz (Hemişelik üýtgemeýän adresiňiz)
 USDT_WALLET_ADDRESS = "TFK7Z1FtBiBu2AnLQhzRtdZR43TsffWtCz"
@@ -137,10 +137,10 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == "buy_method":
         text = "💳 **Tarif saýlaň:**\n\nÖzüňize laýyk gelýän premium möhletini saýlap, töleg ediň:"
         buy_keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton("1 Aýlyk ($...)", callback_data="plan_30")],
-            [InlineKeyboardButton("3 Aýlyk ($...)", callback_data="plan_90")],
-            [InlineKeyboardButton("6 Aýlyk ($...)", callback_data="plan_180")],
-            [InlineKeyboardButton("1 Ýyllyk ($...)", callback_data="plan_365")],
+            [InlineKeyboardButton("1 Aýlyk", callback_data="plan_30")],
+            [InlineKeyboardButton("3 Aýlyk", callback_data="plan_90")],
+            [InlineKeyboardButton("6 Aýlyk", callback_data="plan_180")],
+            [InlineKeyboardButton("1 Ýyllyk", callback_data="plan_365")],
             [InlineKeyboardButton("🔙 Yza", callback_data="premium")]
         ])
         await query.edit_message_text(text=text, reply_markup=buy_keyboard, parse_mode="Markdown")
@@ -158,12 +158,12 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"💳 **Siz saýladyňyz:** {plan_name}\n\n"
             f"Töleg etmek üçin aşakdaky USDT (TRC20) adresimize iberiň:\n"
             f"`{USDT_WALLET_ADDRESS}`\n\n"
-            f"Töleg edip bolanyňyzdan soň, tranzaksiýa belgisini (**TxID**) ýa-da skrinşod kvitansiýasyny şu çata hat arkaly iberiň:"
+            f"Töleg edip bolanyňyzdan soň, tranzaksiýa belgisini (**TxID**) ýa-da töleg skrinşodyny şu çata iberiň:"
         )
         await query.edit_message_text(text=text, reply_markup=back_keyboard, parse_mode="Markdown")
         return
 
-    # Admin tassyklama ýa-da rad etme düwmeleri (Referal ýa-da Satyn alyş üçin umumy)
+    # Admin tassyklama (approve_)
     elif query.data.startswith("approve_"):
         if query.from_user.id != ADMIN_ID:
             await query.answer("Bu düwmäni diňe admin basyp biler!", show_alert=True)
@@ -171,11 +171,11 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         parts = query.data.split("_")
         target_user_id = int(parts[1])
-        days = int(parts[2]) if len(parts) > 2 else 0  # eger satyn alyş bolsa gün möhleti bar
         
         try:
-            if days > 0:
-                # Wagtlaýyn çakylyk ssylkasyny döretmek (göstermeli gün möhleti bilen)
+            if len(parts) > 2:
+                # Kripto satyn alyş (möhletli çakylyk ssylkasy)
+                days = int(parts[2])
                 expire_time = datetime.now() + timedelta(days=days)
                 invite_link = await context.bot.create_chat_invite_link(
                     chat_id=PREMIUM_GROUP_ID,
@@ -187,7 +187,7 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     text=f"🎉 Gutlaýarys! Tölegiňiz tassyksyny tapdy ({days} günlük). Premium toparyň wagtlaýyn ssylkasy:\n\n{invite_link.invite_link}"
                 )
             else:
-                # Referal arkaly gelenler üçin hemişelik ýa-da adaty ssylka
+                # Referal arkaly gelenler (adaty çakylyk ssylkasy)
                 invite_link = await context.bot.create_chat_invite_link(
                     chat_id=PREMIUM_GROUP_ID,
                     member_limit=1
@@ -202,12 +202,13 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.edit_message_text(text=f"⚠️ Ýalňyşlyk ýüze çykdy: {e}")
         return
 
+    # Admin rad etme (reject_)
     elif query.data.startswith("reject_"):
         if query.from_user.id != ADMIN_ID:
             await query.answer("Bu düwmäni diňe admin basyp biler!", show_alert=True)
             return
         
-        target_user_id = int(query.data.split("_")[1])
+        target_user_id = int(parts[1]) if 'parts' in locals() else int(query.data.split("_")[1])
         try:
             await context.bot.send_message(
                 chat_id=target_user_id,
@@ -222,12 +223,23 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text = "❓ Näbelli bölüm."
         await query.edit_message_text(text, reply_markup=back_keyboard)
 
-# Ulanyjynyň ýazan maglumatyny (Broker ID ýa-da TxID) kabul edip admina ugratmak
+# Ulanyjynyň iberen tekst ýa-da surat (skrinşod) maglumatyny kabul edip admina ugratmak
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
     username = update.message.from_user.username or "Ýok"
-    text = update.message.text
     action_type = context.user_data.get("action_type")
+
+    if not action_type:
+        return  # Eger ulanyjy hiç hilli barlag garaşylýan ýerde däl bolsa, jogap bermeli däl
+
+    # Tekst ýa-da surat (photo) barlygyny barlamak
+    text_content = update.message.text
+    photo_file_id = None
+    
+    if update.message.photo:
+        # Surat iberilen bolsa, iň uly rewolýusion file_id-sini alýarys
+        photo_file_id = update.message.photo[-1].file_id
+        text_content = update.message.caption or "Skrinşod iberildi (tekst ýok)"
 
     if action_type == "broker_id":
         context.user_data["action_type"] = None
@@ -235,7 +247,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         admin_text = (
             f"🔔 **Täze Premium Broker Barlag Soragy!**\n\n"
             f"👤 Ulanyjy: @{username} (ID: `{user_id}`)\n"
-            f"📋 Broker ID / Poçta: `{text}`"
+            f"📋 Broker ID / Poçta: `{text_content}`"
         )
         admin_keyboard = InlineKeyboardMarkup([
             [
@@ -245,7 +257,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ])
         
         try:
-            await context.bot.send_message(chat_id=ADMIN_ID, text=admin_text, reply_markup=admin_keyboard, parse_mode="Markdown")
+            if photo_file_id:
+                await context.bot.send_photo(chat_id=ADMIN_ID, photo=photo_file_id, caption=admin_text, reply_markup=admin_keyboard, parse_mode="Markdown")
+            else:
+                await context.bot.send_message(chat_id=ADMIN_ID, text=admin_text, reply_markup=admin_keyboard, parse_mode="Markdown")
+            
             await update.message.reply_text("✅ Maglumatyňyz admina iberildi! Barlanylandan soň premium gruppanyň ssylkasy size iberiler.")
         except Exception:
             await update.message.reply_text("⚠️ Ýalňyşlyk ýüze çykdy, admin ID-niň dogrulygyny barlaň.")
@@ -261,7 +277,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"💳 **Täze Krypto Töleg Barlag Soragy!**\n\n"
             f"👤 Ulanyjy: @{username} (ID: `{user_id}`)\n"
             f"📦 Saýlanan Tarif: {plan_name}\n"
-            f"🧾 Töleg maglumaty (TxID): `{text}`"
+            f"🧾 Töleg maglumaty / TxID: `{text_content}`"
         )
         admin_keyboard = InlineKeyboardMarkup([
             [
@@ -271,7 +287,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ])
         
         try:
-            await context.bot.send_message(chat_id=ADMIN_ID, text=admin_text, reply_markup=admin_keyboard, parse_mode="Markdown")
+            if photo_file_id:
+                await context.bot.send_photo(chat_id=ADMIN_ID, photo=photo_file_id, caption=admin_text, reply_markup=admin_keyboard, parse_mode="Markdown")
+            else:
+                await context.bot.send_message(chat_id=ADMIN_ID, text=admin_text, reply_markup=admin_keyboard, parse_mode="Markdown")
+            
             await update.message.reply_text("✅ Töleg maglumatyňyz admina iberildi! Barlanylandan soň wagtlaýyn premium ssylkasy size iberiler.")
         except Exception:
             await update.message.reply_text("⚠️ Ýalňyşlyk ýüze çykdy, admin ID-niň dogrulygyny barlaň.")
@@ -286,10 +306,12 @@ def main():
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(buttons))
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    # Indi hem tekst hem-de skrinşod (surat) habarlaryny birbada kabul eder ýaly filters üýtgedildi
+    application.add_handler(MessageHandler((filters.TEXT | filters.PHOTO) & ~filters.COMMAND, handle_message))
 
-    print("Meta5Signals Bot started with Crypto Subscription & Invite Links!")
+    print("Meta5Signals Bot started successfully!")
     application.run_polling()
 
 if __name__ == "__main__":
     main()
+
