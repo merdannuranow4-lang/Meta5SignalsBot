@@ -184,7 +184,7 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == "buy_method":
         text = "💳 **Satyn almak üçin möhleti saýlaň:**"
         buy_keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton("1 Aýlyk (💲40)", callback_data="plan_30")],
+            [InlineKeyboardButton("1 Aýlyk", callback_data="plan_30")],
             [InlineKeyboardButton("3 Aýlyk", callback_data="plan_90")],
             [InlineKeyboardButton("6 Aýlyk", callback_data="plan_180")],
             [InlineKeyboardButton("1 Ýyllyk", callback_data="plan_365")],
@@ -206,7 +206,7 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"Siz {month_label} premium satyn alýarsyňyz!\n\n"
             f"Bahasy: 💲{price}\n"
             f"Töleg salgysy: 📌 USDT-TRC20\n"
-            f"Töleg kody: 🔑 `TFK7Z1FtBiBu2AnLQhzRtdZR43TsffWtCz`\n\n"
+            f"Töleg kody: 🔑 `TXx9GWMG3JZ7NqEz76f7cXSbr4TFFjbNZx`\n\n"
             "Tölegi doly tamamlanyňyzdan soň töleg edenligiňiz barada skrinşody hem-de UID kodyňyzy şu çata ýazyň."
         )
         plan_back = InlineKeyboardMarkup([[InlineKeyboardButton("🔙 Yza", callback_data="buy_method")]])
