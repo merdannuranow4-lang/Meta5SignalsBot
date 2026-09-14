@@ -196,7 +196,6 @@ def add_subscription(user_id, username, days, lang='tk'):
     conn = sqlite3.connect("subscriptions.db")
     cursor = conn.cursor()
     
-    # Öňki expire_date bar barmy barlaly we wagtyň üstüne goşaly
     cursor.execute("SELECT expire_date, plan_name FROM subs WHERE user_id = ?", (user_id,))
     row = cursor.fetchone()
     
