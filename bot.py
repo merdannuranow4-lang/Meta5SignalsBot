@@ -32,10 +32,10 @@ def run_web():
 LANGS = {
     "tk": {
         "welcome": "🚀 FX_Nexor Bot-a hoş geldiňiz!\n\n💎 Forex & XAUUSD Signals and News\n📈 Professional Market Analysis\n🔔 Real-Time Trading Signals\n\nDili saýlaň / Choose language:",
-        "menu_signals": "📊 Signals",
-        "menu_news": "🗞️ News",
-        "menu_chat": "👥 Chat group",
-        "menu_website": "🌐 Website",
+        "menu_signals": "📊 Signallar",
+        "menu_news": "🗞️ Habarlar",
+        "menu_chat": "👥 Çat topary",
+        "menu_website": "🌐 Web-sahypa",
         "menu_premium": "💎 Premium Agzalyk",
         "menu_profile": "👤 Profilim",
         "menu_lang": "🌐 Dil / Language",
@@ -61,10 +61,10 @@ LANGS = {
     },
     "tr": {
         "welcome": "🚀 FX_Nexor Bot'a hoş geldiniz!\n\n💎 Forex & XAUUSD Signals and News\n📈 Professional Market Analysis\n🔔 Real-Time Trading Signals\n\nDil seçin / Choose language:",
-        "menu_signals": "📊 Signals",
-        "menu_news": "🗞️ News",
-        "menu_chat": "👥 Chat group",
-        "menu_website": "🌐 Website",
+        "menu_signals": "📊 Sinyaller",
+        "menu_news": "🗞️ Haberler",
+        "menu_chat": "👥 Sohbet Grubu",
+        "menu_website": "🌐 Web Sitesi",
         "menu_premium": "💎 Premium Üyelik",
         "menu_profile": "👤 Profilim",
         "menu_lang": "🌐 Dil / Language",
@@ -90,10 +90,10 @@ LANGS = {
     },
     "ru": {
         "welcome": "🚀 Добро пожаловать в FX_Nexor Bot!\n\n💎 Forex & XAUUSD Signals and News\n📈 Professional Market Analysis\n🔔 Real-Time Trading Signals\n\nВыберите язык / Choose language:",
-        "menu_signals": "📊 Signals",
-        "menu_news": "🗞️ News",
-        "menu_chat": "👥 Chat group",
-        "menu_website": "🌐 Website",
+        "menu_signals": "📊 Сигналы",
+        "menu_news": "🗞️ Новости",
+        "menu_chat": "👥 Чат группа",
+        "menu_website": "🌐 Веб-сайт",
         "menu_premium": "💎 Премиум подписка",
         "menu_profile": "👤 Мой профиль",
         "menu_lang": "🌐 Язык / Language",
@@ -193,17 +193,33 @@ def get_user_info(user_id):
     return row
 
 def add_subscription(user_id, username, days, lang='tk'):
+    conn = sqlite3.connect("subscriptions.db")
+    cursor = conn.cursor()
+    
+    # Öňki expire_date bar barmy barlaly we wagtyň üstüne goşaly
+    cursor.execute("SELECT expire_date, plan_name FROM subs WHERE user_id = ?", (user_id,))
+    row = cursor.fetchone()
+    
+    now = datetime.now()
+    
     if days > 0:
-        expire_date = datetime.now() + timedelta(days=days)
+        if row and row[0] and "Wagtsyz" not in str(row[1]):
+            try:
+                old_expire = datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S")
+                base_time = old_expire if old_expire > now else now
+            except Exception:
+                base_time = now
+        else:
+            base_time = now
+            
+        expire_date = base_time + timedelta(days=days)
         expire_str = expire_date.strftime("%Y-%m-%d %H:%M:%S")
         plan_text = f"{days} gün"
     else:
-        expire_date = datetime.now() + timedelta(days=3650)
+        expire_date = now + timedelta(days=3650)
         expire_str = expire_date.strftime("%Y-%m-%d %H:%M:%S")
         plan_text = "Referal (Wagtsyz)"
 
-    conn = sqlite3.connect("subscriptions.db")
-    cursor = conn.cursor()
     cursor.execute("""
         INSERT INTO subs (user_id, username, plan_name, expire_date, language)
         VALUES (?, ?, ?, ?, COALESCE((SELECT language FROM subs WHERE user_id = ?), ?))
@@ -292,8 +308,7 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 InlineKeyboardButton("🇬🇧 English", callback_data="set_lang_en")
             ],
             [InlineKeyboardButton(t["back"], callback_data="back_to_start")]
-        ]
-        )
+        ])
         await query.edit_message_text("Dil saýlaň / Choose language:", reply_markup=lang_keyboard)
         return
 
@@ -343,7 +358,7 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     elif query.data == "results":
-        text = "🌐 Website\n\nHäzirlikçe el ýeterli däl."
+        text = f"🌐 Website\n\nHäzirlikçe el ýeterli däl." if lang == "tk" else f"🌐 Website\n\nŞu an erişilebilir değil." if lang == "tr" else f"🌐 Веб-сайт\n\nПока недоступен." if lang == "ru" else f"🌐 Website\n\nCurrently unavailable."
         await query.edit_message_text(text, reply_markup=back_keyboard)
     
     elif query.data == "premium":
