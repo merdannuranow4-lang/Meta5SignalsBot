@@ -9,13 +9,10 @@ from telegram.ext import Application, CommandHandler, CallbackQueryHandler, Mess
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
-# Referal düşündirişleri ýazjak toparyňyzyň ssylkasy
 TUTORIAL_GROUP_LINK = "https://t.me/referal_bolmak"
 
-# Administratoryň Telegram ID-si
 ADMIN_ID = 6970856886
 
-# Premium gruppanyň gizlin ssylkasy we Chat ID-si (-100 bilen başlamaly)
 PREMIUM_GROUP_LINK = "https://t.me/+ydp8yB7HNgNkNzJi"
 PREMIUM_GROUP_CHAT_ID = -1004401546667
 
@@ -28,7 +25,9 @@ def home():
 def run_web():
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
 
+
 # --- BAZA BILEN IŞLEMEK (SQLite) ---
+
 def init_db():
     conn = sqlite3.connect("subscriptions.db")
     cursor = conn.cursor()
@@ -42,6 +41,7 @@ def init_db():
     """)
     conn.commit()
     conn.close()
+
 
 def add_subscription(user_id, username, days):
     if days > 0:
@@ -62,27 +62,38 @@ def add_subscription(user_id, username, days):
     conn.commit()
     conn.close()
 
+
 def get_expired_users():
     conn = sqlite3.connect("subscriptions.db")
     cursor = conn.cursor()
     now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
     cursor.execute(
         "SELECT user_id FROM subs WHERE expire_date <= ? AND plan_name != 'Referal (Wagtsyz)'",
         (now_str,)
     )
+
     users = [row[0] for row in cursor.fetchall()]
     conn.close()
+
     return users
+
 
 def remove_expired_user_from_db(user_id):
     conn = sqlite3.connect("subscriptions.db")
     cursor = conn.cursor()
-    cursor.execute("DELETE FROM subs WHERE user_id = ?", (user_id,))
+
+    cursor.execute(
+        "DELETE FROM subs WHERE user_id = ?",
+        (user_id,)
+    )
+
     conn.commit()
     conn.close()
 
+
 # ----------------------------------
-# ULANYJYNYŇ PROFILINIŇ MAGLUMATLARY
+# ULANYJYNYŇ PROFILI
 # ----------------------------------
 
 def get_subscription(user_id):
@@ -102,9 +113,12 @@ def get_subscription(user_id):
 
 def format_remaining_time(expire_date_str):
     try:
-        expire_date = datetime.strptime(expire_date_str, "%Y-%m-%d %H:%M:%S")
-        now = datetime.now()
+        expire_date = datetime.strptime(
+            expire_date_str,
+            "%Y-%m-%d %H:%M:%S"
+        )
 
+        now = datetime.now()
         remaining = expire_date - now
 
         if remaining.total_seconds() <= 0:
@@ -125,20 +139,39 @@ def format_remaining_time(expire_date_str):
 # ----------------------------------
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
     keyboard = [
         [
-            InlineKeyboardButton("📊 Signals", url="https://t.me/meta5signals_XAUUSD"),
-            InlineKeyboardButton("🗞️ News", url="https://t.me/GoldFnews")
+            InlineKeyboardButton(
+                "📊 Signals",
+                url="https://t.me/meta5signals_XAUUSD"
+            ),
+            InlineKeyboardButton(
+                "🗞️ News",
+                url="https://t.me/GoldFnews"
+            )
         ],
         [
-            InlineKeyboardButton("👥 Chat group", url="https://t.me/meta5signal_chat"),
-            InlineKeyboardButton("🌐 Website", callback_data="results")
+            InlineKeyboardButton(
+                "👥 Chat group",
+                url="https://t.me/meta5signal_chat"
+            ),
+            InlineKeyboardButton(
+                "🌐 Website",
+                callback_data="results"
+            )
         ],
         [
-            InlineKeyboardButton("💎 Premium Agzalyk", callback_data="premium")
+            InlineKeyboardButton(
+                "💎 Premium Agzalyk",
+                callback_data="premium"
+            )
         ],
         [
-            InlineKeyboardButton("👤 Meniň profilim", callback_data="my_profile")
+            InlineKeyboardButton(
+                "👤 Meniň profilim",
+                callback_data="my_profile"
+            )
         ]
     ]
 
@@ -155,29 +188,58 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
     query = update.callback_query
     await query.answer()
 
     back_keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("🔙 Yza", callback_data="back_to_start")]
+        [
+            InlineKeyboardButton(
+                "🔙 Yza",
+                callback_data="back_to_start"
+            )
+        ]
     ])
+
+
+    # ----------------------------------
+    # BAŞ MENÝU
+    # ----------------------------------
 
     if query.data == "back_to_start":
 
         keyboard = [
             [
-                InlineKeyboardButton("📊 Signals", url="https://t.me/meta5signals_XAUUSD"),
-                InlineKeyboardButton("🗞️ News", url="https://t.me/GoldFnews")
+                InlineKeyboardButton(
+                    "📊 Signals",
+                    url="https://t.me/meta5signals_XAUUSD"
+                ),
+                InlineKeyboardButton(
+                    "🗞️ News",
+                    url="https://t.me/GoldFnews"
+                )
             ],
             [
-                InlineKeyboardButton("👥 Chat group", url="https://t.me/meta5signal_chat"),
-                InlineKeyboardButton("🌐 Website", callback_data="results")
+                InlineKeyboardButton(
+                    "👥 Chat group",
+                    url="https://t.me/meta5signal_chat"
+                ),
+                InlineKeyboardButton(
+                    "🌐 Website",
+                    callback_data="results"
+                )
             ],
             [
-                InlineKeyboardButton("💎 Premium Agzalyk", callback_data="premium")
+                InlineKeyboardButton(
+                    "💎 Premium Agzalyk",
+                    callback_data="premium"
+                )
             ],
             [
-                InlineKeyboardButton("👤 Meniň profilim", callback_data="my_profile")
+                InlineKeyboardButton(
+                    "👤 Meniň profilim",
+                    callback_data="my_profile"
+                )
             ]
         ]
 
@@ -191,7 +253,9 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
                  "Aşakdaky menýudan saýla:",
             reply_markup=reply_markup
         )
+
         return
+
 
     # ----------------------------------
     # MENIŇ PROFILIM
@@ -211,7 +275,8 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             db_username, plan_name, expire_date = subscription
 
-            # Referal Premium
+            # REFERAL PREMIUM
+
             if plan_name == "Referal (Wagtsyz)":
 
                 profile_text = (
@@ -225,7 +290,8 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     "⏳ Galan wagt: **Wagtsyz**"
                 )
 
-            # Adaty tölegli Premium
+            # ADATY PREMIUM
+
             else:
 
                 remaining = format_remaining_time(expire_date)
@@ -266,17 +332,12 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "Premium almak üçin aşakdaky düwmä basyň."
             )
 
+
         profile_keyboard = InlineKeyboardMarkup([
             [
                 InlineKeyboardButton(
                     "💎 Premium almak",
                     callback_data="premium"
-                )
-            ],
-            [
-                InlineKeyboardButton(
-                    "🔄 Täzele",
-                    callback_data="my_profile"
                 )
             ],
             [
@@ -292,8 +353,12 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=profile_keyboard,
             parse_mode="Markdown"
         )
+
         return
 
+
+    # ----------------------------------
+    # WEBSITE
     # ----------------------------------
 
     if query.data == "results":
@@ -304,6 +369,11 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
             text,
             reply_markup=back_keyboard
         )
+
+
+    # ----------------------------------
+    # PREMIUM
+    # ----------------------------------
 
     elif query.data == "premium":
 
@@ -343,7 +413,13 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=premium_keyboard,
             parse_mode="Markdown"
         )
+
         return
+
+
+    # ----------------------------------
+    # REFERAL
+    # ----------------------------------
 
     elif query.data == "ref_method":
 
@@ -379,7 +455,13 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=ref_keyboard,
             parse_mode="Markdown"
         )
+
         return
+
+
+    # ----------------------------------
+    # BROKER ID
+    # ----------------------------------
 
     elif query.data == "send_id_prompt":
 
@@ -394,7 +476,13 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
             text,
             reply_markup=back_keyboard
         )
+
         return
+
+
+    # ----------------------------------
+    # SATYN ALMAK
+    # ----------------------------------
 
     elif query.data == "buy_method":
 
@@ -438,7 +526,13 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=buy_keyboard,
             parse_mode="Markdown"
         )
+
         return
+
+
+    # ----------------------------------
+    # PLANLAR
+    # ----------------------------------
 
     elif query.data.startswith("plan_"):
 
@@ -485,10 +579,12 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=plan_back,
             parse_mode="Markdown"
         )
+
         return
 
+
     # ----------------------------------
-    # ADMIN TASSYKLAMA / RET ETME
+    # ADMIN TASSYKLAMA
     # ----------------------------------
 
     elif query.data.startswith("approve_"):
@@ -499,6 +595,7 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "Bu düwmäni diňe admin basyp biler!",
                 show_alert=True
             )
+
             return
 
         parts = query.data.split("_")
@@ -557,6 +654,11 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         return
 
+
+    # ----------------------------------
+    # ADMIN RET ETME
+    # ----------------------------------
+
     elif query.data.startswith("reject_"):
 
         if query.from_user.id != ADMIN_ID:
@@ -565,6 +667,7 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "Bu düwmäni diňe admin basyp biler!",
                 show_alert=True
             )
+
             return
 
         target_user_id = int(query.data.split("_")[1])
@@ -599,13 +702,17 @@ async def buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user_id = update.message.from_user.id
-
     username = update.message.from_user.username or "Ýok"
 
     waiting_type = context.user_data.get("waiting_for_type")
 
     if not waiting_type:
         return
+
+
+    # ----------------------------------
+    # REFERAL BROKER ID
+    # ----------------------------------
 
     if waiting_type == "broker_id":
 
@@ -652,6 +759,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "⚠️ Ýalňyşlyk ýüze çykdy, "
                 "admin ID-niň dogrulygyny barlaň."
             )
+
+
+    # ----------------------------------
+    # TÖLEG
+    # ----------------------------------
 
     elif waiting_type.startswith("payment_"):
 
@@ -723,6 +835,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "ýalňyşlyk ýüze çykdy."
             )
 
+
+# ----------------------------------
+# PREMIUM MÖHLETINI BARLAMAK
+# ----------------------------------
 
 async def check_subscriptions_loop(application):
 
